@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TTK Calculator</title>
+<style>
+  body { font-family: Arial; background: #111; color: #eee; padding: 20px; }
+  input, select { width: 100%; padding: 8px; margin: 6px 0; border-radius: 6px; border: none; }
+  .box { background: #222; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+  button { width: 100%; padding: 10px; background: #4CAF50; border: none; border-radius: 6px; color: white; font-size: 16px; }
+  h2 { color: #4CAF50; }
+</style>
+</head>
+<body>
+
+<h2>TTK Calculator</h2>
+
+<div class="box">
+  <label>Fire Interval (seconds):</label>
+  <input id="fi" type="number" step="0.001">
+
+  <label>Enemy HP:</label>
+  <input id="hp" type="number">
+
+  <label>Distance (meters):</label>
+  <input id="distance" type="number">
+</div>
+
+<div class="box">
+  <h3>Damage Per Range</h3>
+  <label>0–10m Damage:</label>
+  <input id="d1" type="number">
+
+  <label>10–20m Damage:</label>
+  <input id="d2" type="number">
+
+  <label>20–35m Damage:</label>
+  <input id="d3" type="number">
+
+  <label>35m+ Damage:</label>
+  <input id="d4" type="number">
+</div>
+
+<div class="box">
+  <h3>Hit Area</h3>
+  <select id="hitArea">
+    <option value="head">Head</option>
+    <option value="upper_body">Upper Body</option>
+    <option value="lower_body">Lower Body</option>
+    <option value="upper_arm">Upper Arm</option>
+    <option value="lower_arm">Lower Arm</option>
+  </select>
+
+  <label>Head Multiplier:</label>
+  <input id="m_head" type="number" step="0.01">
+
+  <label>Upper Body Multiplier:</label>
+  <input id="m_upper" type="number" step="0.01">
+
+  <label>Lower Body Multiplier:</label>
+  <input id="m_lower" type="number" step="0.01">
+
+  <label>Upper Arm Multiplier:</label>
+  <input id="m_uarm" type="number" step="0.01">
+
+  <label>Lower Arm Multiplier:</label>
+  <input id="m_larm" type="number" step="0.01">
+</div>
+
+<button onclick="calculateTTK()">Calculate</button>
+
+<div class="box">
+  <h3>Results</h3>
+  <p id="result"></p>
+</div>
+
+<script>
+function calculateTTK() {
+  let fi = parseFloat(document.getElementById("fi").value);
+  let hp = parseFloat(document.getElementById("hp").value);
+  let dist = parseFloat(document.getElementById("distance").value);
+
+  // Range damage
+  let d1 = parseFloat(document.getElementById("d1").value);
+  let d2 = parseFloat(document.getElementById("d2").value);
+  let d3 = parseFloat(document.getElementById("d3").value);
+  let d4 = parseFloat(document.getElementById("d4").value);
+
+  let damage = (dist <= 10) ? d1 :
+               (dist <= 20) ? d2 :
+               (dist <= 35) ? d3 : d4;
+
+  // Multipliers
+  let multipliers = {
+    head: parseFloat(document.getElementById("m_head").value),
+    upper_body: parseFloat(document.getElementById("m_upper").value),
+    lower_body: parseFloat(document.getElementById("m_lower").value),
+    upper_arm: parseFloat(document.getElementById("m_uarm").value),
+    lower_arm: parseFloat(document.getElementById("m_larm").value)
+  };
+
+  let hit = document.getElementById("hitArea").value;
+  let finalDamage = damage * multipliers[hit];
+
+  // Shots to kill (ceiling)
+  let shots = Math.ceil(hp / finalDamage);
+
+  // TTK
+  let ttk = (shots - 1) * fi;
+
+  document.getElementById("result").innerHTML =
+    "Final Damage: " + finalDamage.toFixed(2) + "<br>" +
+    "Shots to Kill: " + shots + "<br>" +
+    "TTK: " + ttk.toFixed(3) + " seconds";
+}
+</script>
+
+</body>
+</html>
