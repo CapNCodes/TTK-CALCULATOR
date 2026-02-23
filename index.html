@@ -1,118 +1,559 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>TTK Calculator</title>
-<style>
-  body { font-family: Arial; background: #111; color: #eee; padding: 20px; }
-  input, select { width: 100%; padding: 8px; margin: 6px 0; border-radius: 6px; border: none; }
-  .box { background: #222; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-  button { width: 100%; padding: 10px; background: #4CAF50; border: none; border-radius: 6px; color: white; font-size: 16px; }
-  h2 { color: #4CAF50; }
-</style>
+  <meta charset="UTF-8">
+  <title>Advanced TTK Calculator</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 16px;
+    }
+    h1, h2, h3 {
+      margin-top: 0;
+      color: #f9fafb;
+    }
+    .box {
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      background: #020617;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    input, select, button {
+      font-size: 14px;
+      padding: 4px 6px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+    }
+    input:focus, select:focus {
+      outline: 1px solid #38bdf8;
+    }
+    button {
+      cursor: pointer;
+      background: #0ea5e9;
+      border: none;
+      color: #0b1120;
+      font-weight: 600;
+    }
+    button.secondary {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #4b5563;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .row > div {
+      flex: 1 1 120px;
+      min-width: 120px;
+    }
+    .range-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+    .range-row input {
+      width: 80px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    th, td {
+      border: 1px solid #1f2937;
+      padding: 4px 6px;
+      text-align: center;
+    }
+    th {
+      background: #020617;
+    }
+    .small-note {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+  </style>
 </head>
 <body>
+  <h1>Advanced TTK Calculator</h1>
 
-<h2>TTK Calculator</h2>
+  <!-- Gun settings -->
+  <div class="box">
+    <h2>Gun Settings</h2>
 
-<div class="box">
-  <label>Fire Interval (seconds):</label>
-  <input id="fi" type="number" step="0.001">
+    <div class="row">
+      <div>
+        <label>Gun name</label>
+        <input id="gunName" type="text" placeholder="e.g. Type 25">
+      </div>
+      <div>
+        <label>Fire interval (s)</label>
+        <input id="fireInterval" type="number" step="0.001" value="0.080">
+      </div>
+    </div>
 
-  <label>Enemy HP:</label>
-  <input id="hp" type="number">
+    <h3>Damage multipliers</h3>
+    <div class="row">
+      <div>
+        <label>Head</label>
+        <input id="multHead" type="number" step="0.01" value="1.3">
+      </div>
+      <div>
+        <label>Upper body</label>
+        <input id="multUpper" type="number" step="0.01" value="1.1">
+      </div>
+      <div>
+        <label>Lower body</label>
+        <input id="multLower" type="number" step="0.01" value="1.0">
+      </div>
+      <div>
+        <label>Upper arm</label>
+        <input id="multUArm" type="number" step="0.01" value="1.0">
+      </div>
+      <div>
+        <label>Lower arm</label>
+        <input id="multLArm" type="number" step="0.01" value="1.0">
+      </div>
+    </div>
 
-  <label>Distance (meters):</label>
-  <input id="distance" type="number">
-</div>
+    <h3>Damage ranges</h3>
+    <div id="ranges"></div>
+    <button type="button" onclick="addRange()">Add range</button>
+    <div class="small-note">Ranges are checked in the order you enter them (top to bottom).</div>
 
-<div class="box">
-  <h3>Damage Per Range</h3>
-  <label>0–10m Damage:</label>
-  <input id="d1" type="number">
+    <h3>Saved guns</h3>
+    <div class="row">
+      <div>
+        <label>Select gun</label>
+        <select id="gunSelect" onchange="loadSelectedGun()">
+        </select>
+      </div>
+      <div style="display:flex; gap:6px; align-items:flex-end;">
+        <button type="button" onclick="saveCurrentGun()">Save / Update</button>
+        <button type="button" class="secondary" onclick="deleteCurrentGun()">Delete</button>
+      </div>
+    </div>
+  </div>
 
-  <label>10–20m Damage:</label>
-  <input id="d2" type="number">
+  <!-- HP settings -->
+  <div class="box">
+    <h2>HP Settings</h2>
+    <div class="row">
+      <div>
+        <label>Preset HP values (comma separated)</label>
+        <input id="hpPresets" type="text" value="100,150,200,250,300">
+      </div>
+      <div>
+        <label>Extra custom HP (optional)</label>
+        <input id="hpCustom" type="number" min="1" placeholder="e.g. 220">
+      </div>
+    </div>
+  </div>
 
-  <label>20–35m Damage:</label>
-  <input id="d3" type="number">
+  <!-- Shot pattern box -->
+  <div class="box">
+    <h2>Shot Pattern</h2>
+    <label>Pattern</label>
+    <select id="pattern" onchange="onPatternChange()">
+      <option value="all_head">All Head</option>
+      <option value="all_upper">All Upper Body</option>
+      <option value="all_lower">All Lower Body</option>
+      <option value="one_head_rest_upper">1 Head, rest Upper Body</option>
+      <option value="two_head_rest_upper">2 Head, rest Upper Body</option>
+      <option value="one_head_one_uarm_rest_upper">1 Head + 1 Upper Arm + rest Upper Body</option>
+      <option value="custom">Custom</option>
+    </select>
 
-  <label>35m+ Damage:</label>
-  <input id="d4" type="number">
-</div>
+    <div id="customPattern" style="display:none; margin-top:8px;">
+      <div class="row">
+        <div>
+          <label>Head shots</label>
+          <input id="c_head" type="number" min="0" value="0">
+        </div>
+        <div>
+          <label>Upper body shots</label>
+          <input id="c_upper" type="number" min="0" value="0">
+        </div>
+        <div>
+          <label>Lower body shots</label>
+          <input id="c_lower" type="number" min="0" value="0">
+        </div>
+        <div>
+          <label>Upper arm shots</label>
+          <input id="c_uarm" type="number" min="0" value="0">
+        </div>
+        <div>
+          <label>Lower arm shots</label>
+          <input id="c_larm" type="number" min="0" value="0">
+        </div>
+      </div>
+      <div class="small-note">
+        Custom pattern is applied first; if it doesn't kill, extra upper-body shots are added automatically.
+      </div>
+    </div>
+  </div>
 
-<div class="box">
-  <h3>Hit Area</h3>
-  <select id="hitArea">
-    <option value="head">Head</option>
-    <option value="upper_body">Upper Body</option>
-    <option value="lower_body">Lower Body</option>
-    <option value="upper_arm">Upper Arm</option>
-    <option value="lower_arm">Lower Arm</option>
-  </select>
+  <!-- Calculate + results -->
+  <div class="box">
+    <h2>Results</h2>
+    <button type="button" onclick="calculateAll()">Calculate</button>
+    <div id="results"></div>
+  </div>
 
-  <label>Head Multiplier:</label>
-  <input id="m_head" type="number" step="0.01">
+  <script>
+    // --- Data storage ---
+    let guns = [];
+    let currentGunIndex = -1;
 
-  <label>Upper Body Multiplier:</label>
-  <input id="m_upper" type="number" step="0.01">
+    function loadGunsFromStorage() {
+      const raw = localStorage.getItem("ttk_guns");
+      if (raw) {
+        try {
+          guns = JSON.parse(raw);
+        } catch (e) {
+          guns = [];
+        }
+      }
+      refreshGunSelect();
+    }
 
-  <label>Lower Body Multiplier:</label>
-  <input id="m_lower" type="number" step="0.01">
+    function saveGunsToStorage() {
+      localStorage.setItem("ttk_guns", JSON.stringify(guns));
+    }
 
-  <label>Upper Arm Multiplier:</label>
-  <input id="m_uarm" type="number" step="0.01">
+    function refreshGunSelect() {
+      const sel = document.getElementById("gunSelect");
+      sel.innerHTML = "";
+      if (guns.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "-1";
+        opt.textContent = "(no saved guns)";
+        sel.appendChild(opt);
+        currentGunIndex = -1;
+        return;
+      }
+      guns.forEach((g, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = g.name || ("Gun " + (i+1));
+        sel.appendChild(opt);
+      });
+      if (currentGunIndex < 0 || currentGunIndex >= guns.length) {
+        currentGunIndex = 0;
+      }
+      sel.value = currentGunIndex;
+      loadGunToForm(guns[currentGunIndex]);
+    }
 
-  <label>Lower Arm Multiplier:</label>
-  <input id="m_larm" type="number" step="0.01">
-</div>
+    function loadSelectedGun() {
+      const sel = document.getElementById("gunSelect");
+      const idx = parseInt(sel.value);
+      if (!isNaN(idx) && idx >= 0 && idx < guns.length) {
+        currentGunIndex = idx;
+        loadGunToForm(guns[idx]);
+      }
+    }
 
-<button onclick="calculateTTK()">Calculate</button>
+    function loadGunToForm(gun) {
+      document.getElementById("gunName").value = gun.name || "";
+      document.getElementById("fireInterval").value = gun.fireInterval || 0.08;
+      document.getElementById("multHead").value = gun.multipliers.head;
+      document.getElementById("multUpper").value = gun.multipliers.upper;
+      document.getElementById("multLower").value = gun.multipliers.lower;
+      document.getElementById("multUArm").value = gun.multipliers.uarm;
+      document.getElementById("multLArm").value = gun.multipliers.larm;
 
-<div class="box">
-  <h3>Results</h3>
-  <p id="result"></p>
-</div>
+      const rangesDiv = document.getElementById("ranges");
+      rangesDiv.innerHTML = "";
+      (gun.ranges || []).forEach(r => {
+        addRangeRow(r.max, r.damage);
+      });
+    }
 
-<script>
-function calculateTTK() {
-  let fi = parseFloat(document.getElementById("fi").value);
-  let hp = parseFloat(document.getElementById("hp").value);
-  let dist = parseFloat(document.getElementById("distance").value);
+    function readGunFromForm() {
+      const name = document.getElementById("gunName").value.trim();
+      const fireInterval = parseFloat(document.getElementById("fireInterval").value) || 0.08;
+      const multHead = parseFloat(document.getElementById("multHead").value) || 1.0;
+      const multUpper = parseFloat(document.getElementById("multUpper").value) || 1.0;
+      const multLower = parseFloat(document.getElementById("multLower").value) || 1.0;
+      const multUArm = parseFloat(document.getElementById("multUArm").value) || 1.0;
+      const multLArm = parseFloat(document.getElementById("multLArm").value) || 1.0;
 
-  // Range damage
-  let d1 = parseFloat(document.getElementById("d1").value);
-  let d2 = parseFloat(document.getElementById("d2").value);
-  let d3 = parseFloat(document.getElementById("d3").value);
-  let d4 = parseFloat(document.getElementById("d4").value);
+      const rangesDiv = document.getElementById("ranges");
+      const rows = rangesDiv.querySelectorAll(".range-row");
+      const ranges = [];
+      rows.forEach(row => {
+        const maxInput = row.querySelector(".range-max");
+        const dmgInput = row.querySelector(".range-dmg");
+        const max = parseFloat(maxInput.value);
+        const dmg = parseFloat(dmgInput.value);
+        if (!isNaN(max) && !isNaN(dmg)) {
+          ranges.push({ max: max, damage: dmg });
+        }
+      });
 
-  let damage = (dist <= 10) ? d1 :
-               (dist <= 20) ? d2 :
-               (dist <= 35) ? d3 : d4;
+      return {
+        name,
+        fireInterval,
+        multipliers: {
+          head: multHead,
+          upper: multUpper,
+          lower: multLower,
+          uarm: multUArm,
+          larm: multLArm
+        },
+        ranges
+      };
+    }
 
-  // Multipliers
-  let multipliers = {
-    head: parseFloat(document.getElementById("m_head").value),
-    upper_body: parseFloat(document.getElementById("m_upper").value),
-    lower_body: parseFloat(document.getElementById("m_lower").value),
-    upper_arm: parseFloat(document.getElementById("m_uarm").value),
-    lower_arm: parseFloat(document.getElementById("m_larm").value)
-  };
+    function saveCurrentGun() {
+      const gun = readGunFromForm();
+      if (!gun.name) {
+        alert("Enter a gun name before saving.");
+        return;
+      }
+      if (!gun.ranges || gun.ranges.length === 0) {
+        alert("Add at least one damage range.");
+        return;
+      }
+      if (currentGunIndex >= 0 && currentGunIndex < guns.length) {
+        guns[currentGunIndex] = gun;
+      } else {
+        guns.push(gun);
+        currentGunIndex = guns.length - 1;
+      }
+      saveGunsToStorage();
+      refreshGunSelect();
+      alert("Gun saved.");
+    }
 
-  let hit = document.getElementById("hitArea").value;
-  let finalDamage = damage * multipliers[hit];
+    function deleteCurrentGun() {
+      if (currentGunIndex < 0 || currentGunIndex >= guns.length) return;
+      if (!confirm("Delete this gun?")) return;
+      guns.splice(currentGunIndex, 1);
+      saveGunsToStorage();
+      currentGunIndex = -1;
+      refreshGunSelect();
+    }
 
-  // Shots to kill (ceiling)
-  let shots = Math.ceil(hp / finalDamage);
+    // --- Range rows ---
+    function addRangeRow(maxVal = "", dmgVal = "") {
+      const rangesDiv = document.getElementById("ranges");
+      const row = document.createElement("div");
+      row.className = "range-row";
+      row.innerHTML = `
+        <label>Max (m): <input type="number" class="range-max" value="${maxVal}"></label>
+        <label>Dmg: <input type="number" class="range-dmg" value="${dmgVal}"></label>
+        <button type="button" class="secondary" onclick="deleteRange(this)">X</button>
+      `;
+      rangesDiv.appendChild(row);
+    }
 
-  // TTK
-  let ttk = (shots - 1) * fi;
+    function addRange() {
+      addRangeRow();
+    }
 
-  document.getElementById("result").innerHTML =
-    "Final Damage: " + finalDamage.toFixed(2) + "<br>" +
-    "Shots to Kill: " + shots + "<br>" +
-    "TTK: " + ttk.toFixed(3) + " seconds";
-}
-</script>
+    function deleteRange(btn) {
+      const row = btn.closest(".range-row");
+      if (row) row.remove();
+    }
 
+    // --- Pattern logic ---
+    function onPatternChange() {
+      const pattern = document.getElementById("pattern").value;
+      const customDiv = document.getElementById("customPattern");
+      customDiv.style.display = (pattern === "custom") ? "block" : "none";
+    }
+
+    function getPatternShots(pattern, stk) {
+      switch(pattern) {
+        case "all_head":
+          return { head: stk, upper: 0, lower: 0, uarm: 0, larm: 0 };
+        case "all_upper":
+          return { head: 0, upper: stk, lower: 0, uarm: 0, larm: 0 };
+        case "all_lower":
+          return { head: 0, upper: 0, lower: stk, uarm: 0, larm: 0 };
+        case "one_head_rest_upper":
+          return { head: 1, upper: Math.max(stk - 1, 0), lower: 0, uarm: 0, larm: 0 };
+        case "two_head_rest_upper":
+          return { head: 2, upper: Math.max(stk - 2, 0), lower: 0, uarm: 0, larm: 0 };
+        case "one_head_one_uarm_rest_upper":
+          return { head: 1, upper: Math.max(stk - 2, 0), lower: 0, uarm: 1, larm: 0 };
+        case "custom":
+          return {
+            head: parseInt(document.getElementById("c_head").value) || 0,
+            upper: parseInt(document.getElementById("c_upper").value) || 0,
+            lower: parseInt(document.getElementById("c_lower").value) || 0,
+            uarm: parseInt(document.getElementById("c_uarm").value) || 0,
+            larm: parseInt(document.getElementById("c_larm").value) || 0
+          };
+      }
+    }
+
+    // --- Core math ---
+    function getDamageForRange(ranges, index) {
+      if (index < 0 || index >= ranges.length) return null;
+      return ranges[index].damage;
+    }
+
+    function getRangeLabel(ranges, index) {
+      if (index < 0 || index >= ranges.length) return "";
+      const max = ranges[index].max;
+      const prevMax = (index === 0) ? 0 : ranges[index-1].max;
+      return prevMax + "–" + max + "m";
+    }
+
+    function computeForRangeAndHP(baseDmg, mults, hp, pattern, fireInterval) {
+      // Choose a "base" multiplier for STK estimate depending on pattern
+      let baseMult = mults.upper;
+      if (pattern === "all_head") baseMult = mults.head;
+      if (pattern === "all_lower") baseMult = mults.lower;
+
+      const baseHitDmg = baseDmg * baseMult;
+      if (baseHitDmg <= 0) return null;
+
+      let stkEstimate = Math.ceil(hp / baseHitDmg);
+      if (stkEstimate < 1) stkEstimate = 1;
+
+      let shots = getPatternShots(pattern, stkEstimate);
+
+      // Compute damage from pattern
+      function totalDamageFromShots(sh) {
+        return (
+          sh.head * baseDmg * mults.head +
+          sh.upper * baseDmg * mults.upper +
+          sh.lower * baseDmg * mults.lower +
+          sh.uarm * baseDmg * mults.uarm +
+          sh.larm * baseDmg * mults.larm
+        );
+      }
+
+      let totalDamage = totalDamageFromShots(shots);
+      let totalShots = shots.head + shots.upper + shots.lower + shots.uarm + shots.larm;
+      let extraShots = 0;
+
+      // If pattern doesn't kill, add extra upper-body shots until it does
+      while (totalDamage < hp) {
+        extraShots++;
+        totalShots++;
+        totalDamage += baseDmg * mults.upper;
+      }
+
+      const ttkSeconds = (totalShots - 1) * fireInterval;
+      const ttkMs = ttkSeconds * 1000;
+
+      return {
+        shots: totalShots,
+        ttkMs: ttkMs,
+        extraShots: extraShots
+      };
+    }
+
+    function parseHPList() {
+      const presetStr = document.getElementById("hpPresets").value;
+      const parts = presetStr.split(",");
+      const list = [];
+      parts.forEach(p => {
+        const v = parseInt(p.trim());
+        if (!isNaN(v) && v > 0) list.push(v);
+      });
+      const custom = parseInt(document.getElementById("hpCustom").value);
+      if (!isNaN(custom) && custom > 0) list.push(custom);
+      return list;
+    }
+
+    function calculateAll() {
+      const gun = readGunFromForm();
+      if (!gun.ranges || gun.ranges.length === 0) {
+        alert("Add at least one damage range.");
+        return;
+      }
+      const hpList = parseHPList();
+      if (hpList.length === 0) {
+        alert("Add at least one HP value.");
+        return;
+      }
+
+      const pattern = document.getElementById("pattern").value;
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      thead.innerHTML = `
+        <tr>
+          <th>Range</th>
+          <th>HP</th>
+          <th>Base dmg</th>
+          <th>Shots to kill</th>
+          <th>TTK (ms)</th>
+          <th>Notes</th>
+        </tr>
+      `;
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+
+      gun.ranges.forEach((r, idx) => {
+        const baseDmg = getDamageForRange(gun.ranges, idx);
+        const rangeLabel = getRangeLabel(gun.ranges, idx);
+
+        hpList.forEach(hp => {
+          const res = computeForRangeAndHP(
+            baseDmg,
+            gun.multipliers,
+            hp,
+            pattern,
+            gun.fireInterval
+          );
+          if (!res) return;
+
+          const tr = document.createElement("tr");
+          const note = (res.extraShots > 0)
+            ? `Pattern + ${res.extraShots} extra upper-body shot(s)`
+            : `Pattern only`;
+
+          tr.innerHTML = `
+            <td>${rangeLabel}</td>
+            <td>${hp}</td>
+            <td>${baseDmg}</td>
+            <td>${res.shots}</td>
+            <td>${res.ttkMs.toFixed(1)}</td>
+            <td>${note}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+
+      table.appendChild(tbody);
+      resultsDiv.appendChild(table);
+    }
+
+    // --- Init ---
+    window.onload = function() {
+      loadGunsFromStorage();
+      if (guns.length === 0) {
+        // Add a default empty range row
+        addRangeRow();
+      }
+      onPatternChange();
+    };
+  </script>
 </body>
 </html>
